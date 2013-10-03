@@ -244,22 +244,62 @@ static VList addtoList (Graph g, VList v, Location loca, Transport type) {
 }
 
 static void makeMap(Graph g){
-    addLink(g, EDINBURGH, MACHESTER, ROAD);
-    addLink(g, EDINBURGH, MACHESTER, RAIL);
+    addLink(g, EDINBURGH, MANCHESTER, ROAD);
+    addLink(g, EDINBURGH, MANCHESTER, RAIL);
+    addLink(g, EDINBURGH, HAMBURG, SEA);
+    addLink(g, EDINBURGH, AMSTERDAM, SEA);
     
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
-    addLink(g, ALICANTE, GRANADA, ROAD);
+    
+    addLink(g, GALWAY, DUBLIN, ROAD);
+    addLink(g, GALWAY, LISBON, SEA);
+    addLink(g, GALWAY, CADIZ, SEA);
+    
+    addLink(g, DUBLIN, LIVERPOOL, SEA);
+    addLink(g, DUBLIN, SWANSEA, SEA);
+    
+    addLink (g, LIVERPOOL, MANCHESTER, RAIL);
+    addLink (g, LIVERPOOL, MANCHESTER, ROAD);
+    addLink (g, LIVERPOOL, SWANSEA, ROAD);
+    addLink (g, LIVERPOOL, SWANSEA, SEA);
+    addLink (g, LIVERPOOL, DUBLIN, SEA);
+    
+    addLink (g, MANCHESTER, LONDON, ROAD);
+    addLink (g, MANCHESTER, LONDON, RAIL);
+    
+    addLink (g, SWANSEA, LONDON, ROAD);
+    addLink (g, SWANSEA, LONDON, RAIL);
+    
+    
+    addLink(g, LONDON, LE_HAVRE, SEA);
+    addLink(g, LONDON, PLYMOUTH, SEA);
+    addLink(g, LONDON, PLYMOUTH, ROAD);
+    
+    addLink(g, AMSTERDAM, BRUSSELS, ROAD);
+    addLink(g, AMSTERDAM, COLOGNE, ROAD);
+    addLink(g, AMSTERDAM, HAMBURG, SEA);
+    
+    addLink(g, COLOGNE, HAMBURG, ROAD);
+    addLink(g, COLOGNE, BRUSSELS, ROAD);
+    addLink(g, COLOGNE, BRUSSELS, RAIL);
+    addLink(g, COLOGNE, STRASBOURG, ROAD);
+    addLink(g, COLOGNE, LEIPZIG, ROAD);
+    addLink(g, COLOGNE, FRANKFURT, ROAD);
+    addLink(g, COLOGNE, FRANKFURT, RAIL);
+    
+    addLink(g, HAMBURG, LEIPZIG, ROAD);
+    addLink(g, HAMBURG, BERLIN, ROAD);
+    addLink(g, HAMBURG, BERLIN, RAIL);
+    
+    addLink(g, BERLIN, LEIPZIG, ROAD);
+    addLink(g, BERLIN, LEIPZIG, RAIL);
+
+    addLink(g, BERLIN, PRAGUE, ROAD);
+    addLink(g, BERLIN, PRAGUE, RAIL);
+    
+    addLink(g, BRUSSELS, PRAGUE, ROAD);
+    addLink(g, BERLIN, PRAGUE, ROAD);
+
+
 }
 
 //Useful for debugging

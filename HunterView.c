@@ -10,6 +10,8 @@
 #define ANY 4
 #define NUM_TRANSPORT 3
 
+//Can the Clashbee helps? :( 
+
 // vertices denoted by integers 0..N-1 
 typedef int Location;
 typedef int Transport; 

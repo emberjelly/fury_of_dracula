@@ -364,5 +364,6 @@ static int isAdjacent(Graph g,Location start, Location end, Transport type){
     }
     
     return 0;
+    
 }
 

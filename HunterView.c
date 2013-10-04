@@ -11,6 +11,8 @@
 #define ANY 4
 #define NUM_TRANSPORT 3
 
+//Can the Clashbee helps? :( 
+
 // vertices denoted by integers 0..N-1 
 typedef int Location;
 typedef int Transport; 
@@ -703,5 +705,7 @@ static int isAdjacent(Graph g,Location start, Location end, Transport type){
     }
     
     return 0;
+    
+    
 }
 

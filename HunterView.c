@@ -68,6 +68,7 @@ struct hunterView {
     int hello; //Whatever that is
     Graph map; //The graph of the map
     char trail[6][2]; //An array of draculas trail and traps/vampires
+    char characterTrails[5][TRAIL_SIZE];
 };
      
 
@@ -105,6 +106,7 @@ HunterView newHunterView( char *pastPlays, playerMessage messages[] ) {
         if (i2 == 7) {
             //When the string is full update the hunterView
             update(hunterView, play);
+            i1++;
         }
         i1 ++;
         i2 = i1%7;
@@ -113,23 +115,31 @@ HunterView newHunterView( char *pastPlays, playerMessage messages[] ) {
 
     update(hunterView, pastPlays);
     hunterView->map = newGraph();
-    
-    showGraph(hunterView->map);
+
     return hunterView;
+        
+    showGraph(hunterView->map);
 }
 
 static void update(HunterView hunterView, char *play) {
     
     //The character whose turn it is
-    int character = play[0];
-
+    int character;
+    
+    if (play[0] == 'B') character = 0;
+    if (play[0] == 'S') character = 1;
+    if (play[0] == 'H') character = 2;
+    if (play[0] == 'M') character = 3;
+    if (play[0] == 'D') character = 4;
+    printf("%s\n\n\n", play);
     //A string to store the city code
     char city[3];
     city[0] = play[1];
     city[1] = play[2];
-    city[2] = '\n';
-    
+    city[2] = '\0';
+
     //Move the player to the new location
+
     if (strcmp(city,"AL") == 0) hunterView->playerLocations[character] = 0;
     if (strcmp(city,"AM") == 0) hunterView->playerLocations[character] = 1;
     if (strcmp(city,"AT") == 0) hunterView->playerLocations[character] = 2;
@@ -215,6 +225,9 @@ static void update(HunterView hunterView, char *play) {
             if (event == 'V') {
                 //Vampire has matured
                 hunterView->score -= 13;
+            }
+            if (event == 'M') {
+                //trap left trail
             }
         } else {
             //Hunter

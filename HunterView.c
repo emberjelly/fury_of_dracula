@@ -454,9 +454,7 @@ static void makeMap(Graph g){
     addLink(g, CONSTANTA, BUCHAREST, RAIL);
     addLink(g, CONSTANTA, VARNA, ROAD);
     addLink(g, CONSTANTA, VARNA, SEA);
-    addLink(g, CONSTANTA, SALONICA, SEA);
-    addLink(g, CONSTANTA, ATHENS, SEA);
-    addLink(g, CONSTANTA, VALONA, SEA);
+
     
     addLink(g, ZAGREB, SZEGED, ROAD);
     addLink(g, ZAGREB, SARAJEVO, ROAD);
@@ -472,10 +470,6 @@ static void makeMap(Graph g){
     
     addLink(g, BUCHAREST, BELGRADE, ROAD);
     addLink(g, BUCHAREST, SOFIA, ROAD);
-    
-    addLink(g, VARNA, SALONICA, SEA);
-    addLink(g, VARNA, ATHENS, SEA);
-    addLink(g, VARNA, VALONA, SEA);
     
     addLink(g, SARAJEVO, BELGRADE, ROAD);
     addLink(g, SARAJEVO, SOFIA, ROAD);

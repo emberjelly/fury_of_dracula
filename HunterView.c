@@ -27,15 +27,8 @@ typedef struct GraphRep *Graph;
 // operations on graphs 
 static Graph newGraph();
 static void destroyGraph(Graph g); 
-static void showGraph(Graph g); 
-
-//static int numV(Graph g);
-//static int numE(Graph g, Transport t);
-
-
-//returns 1 if there is an edge from start to end with a given transport type
-//returns 0 otherwise
-static int isAdjacent(Graph g,Location start, Location end, Transport type);
+static void updateTrail (HunterView h);
+static void canReachInN(Graph g, Location start, Transport type, int n, int locs[]);
 static void update(HunterView hunterView, char *play);
 typedef struct vNode *VList;
 
@@ -45,7 +38,7 @@ static VList addtoList (Graph g, VList v, Location loca, Transport type);
 
 struct vNode { 
     Location v;     //ALICANTE etc
-    Transport type; //LAND, SEA, ANY
+    Transport type; //ROAD, RAIL, SEA, ANY
     VList next; 
 };  
 
@@ -67,8 +60,7 @@ struct hunterView {
     LocationID playerLocation; //Location of current player
     int hello; //Whatever that is
     Graph map; //The graph of the map
-    char trail[6][2]; //An array of draculas trail and traps/vampires
-    char characterTrails[5][TRAIL_SIZE];
+    char trails[5][TRAIL_SIZE];
 };
      
 
@@ -94,7 +86,12 @@ HunterView newHunterView( char *pastPlays, playerMessage messages[] ) {
     hunterView->playerLocations[2] = UNKNOWN_LOCATION;
     hunterView->playerLocations[3] = UNKNOWN_LOCATION;
     hunterView->playerLocations[4] = UNKNOWN_LOCATION;
-    
+    int i, j;
+    for (i = 0; i < 5; i ++) {
+        for (j = 0; j < TRAIL_SIZE; j ++) {
+            hunterView->trails[i][j] = UNKNOWN_LOCATION;
+        }
+    }
     //Store each characters information in a play
     char play[8];
     int i1 = 0;
@@ -103,13 +100,13 @@ HunterView newHunterView( char *pastPlays, playerMessage messages[] ) {
     int pos = 0;
     int turnCount = 0;
     //A wrapper for updating the hunterView
-    while (pastPlays[i1] != '\0')  {
+    while (pastPlays[pos] != '\0')  {
         //Build the string with the player info for this turn
         play[i2] = pastPlays[pos];
         if (i2 == 6) {
             printf("update ");
             update(hunterView, play);
-            pos ++;
+            if (pastPlays[pos + 1] != '\0') pos ++;
             turnCount ++;
             if (turnCount % 5 == 0) {
                 //When all 5 players have had a turn
@@ -122,17 +119,11 @@ HunterView newHunterView( char *pastPlays, playerMessage messages[] ) {
         pos ++;
         i1 ++;
         i2 = i1%7;
-
-        //printf("%d\n", i2);
-
-
     }
     
     hunterView->map = newGraph();
 
     return hunterView;
-        
-    showGraph(hunterView->map);
 }
 
 static void update(HunterView hunterView, char *play) {
@@ -145,7 +136,7 @@ static void update(HunterView hunterView, char *play) {
     if (play[0] == 'H') character = 2;
     if (play[0] == 'M') character = 3;
     if (play[0] == 'D') character = 4;
-    printf("%s\n\n\n", play);
+    printf("%s\n", play);
     //A string to store the city code
     char city[3];
     city[0] = play[1];
@@ -223,8 +214,20 @@ static void update(HunterView hunterView, char *play) {
     if (city[0] == 'D') hunterView->playerLocations[character] = 73 + (int)city[1] - '0';
     if (strcmp(city,"TP") == 0) hunterView->playerLocations[character] = 79;
     
-    //Look at the remaining 4 spaces
+    if (strcmp(city,"NS") == 0) hunterView->playerLocations[character] =  61;
+    if (strcmp(city,"EC") == 0) hunterView->playerLocations[character] =  62;
+    if (strcmp(city,"IS") == 0) hunterView->playerLocations[character] =  63;
+    if (strcmp(city,"AO") == 0) hunterView->playerLocations[character] =  64;
+    if (strcmp(city,"BB") == 0) hunterView->playerLocations[character] =  65;
+    if (strcmp(city,"MS") == 0) hunterView->playerLocations[character] =  66;
+    if (strcmp(city,"TS") == 0) hunterView->playerLocations[character] =  67;
+    if (strcmp(city,"IO") == 0) hunterView->playerLocations[character] =  68;
+    if (strcmp(city,"AS") == 0) hunterView->playerLocations[character] =  69;
+    if (strcmp(city,"BS") == 0) hunterView->playerLocations[character] =  70;
+
     
+    //Look at the remaining 4 spaces
+
     int i;
     char event;
     for (i = 0; i < 4; i ++) {
@@ -264,8 +267,23 @@ static void update(HunterView hunterView, char *play) {
     }
     
     //Update the player whose next turn it is
+    updateTrail (hunterView);
     hunterView->curPlayer ++;
-    if (hunterView->curPlayer > 4) hunterView->curPlayer = 0; 
+    if (hunterView->curPlayer > 4) hunterView->curPlayer = 0;
+}
+
+static void updateTrail (HunterView h) {
+    char newTrail[6];
+    newTrail[0] = getLocation(h, h->curPlayer);
+    int i;
+    for (i = 0; i < 5; i ++) {
+        newTrail[i + 1] = h->trails[h->curPlayer][i];
+
+    }
+
+    for (i = 0; i < 6; i ++) {
+        h->trails[h->curPlayer][i] = newTrail[i];
+    }
 }
 
 // this function frees all memory previously allocated for the HunterView
@@ -279,7 +297,6 @@ void disposeHunterView( HunterView toBeDeleted ) {
 
 Round getRound (HunterView currentView) {
     return currentView->round;
-
 }
 
 //Get the id of current player - ie whose turn is it?
@@ -296,8 +313,6 @@ int getScore(HunterView currentView) {
 //Get the current health points for a given player
 int getHealth(HunterView currentView, PlayerID id) {
     return currentView->hp[id];
-
-
 }
 
 //Get the current location id of a given player
@@ -305,7 +320,6 @@ int getHealth(HunterView currentView, PlayerID id) {
 //(ie at the beginning of the game
 //Or for dracula it may be UNKNOWN_CITY or UNKNOWN_SEA
 LocationID getLocation(HunterView currentView, PlayerID id) {
-
     return currentView->playerLocations[id];
 }
 
@@ -320,8 +334,10 @@ LocationID getLocation(HunterView currentView, PlayerID id) {
 // This would mean in the first move the player started on location 182 
 // then moved to the current location of 29
 void getHistory (HunterView currentView, PlayerID player,LocationID trail[TRAIL_SIZE]) {
-
-
+    int i;
+    for (i = 0; i < TRAIL_SIZE; i ++) {
+        trail[i] = currentView->trails[player][i];
+    }
 }
 
 //Functions that query the map to find information about connectivity
@@ -338,8 +354,66 @@ void getHistory (HunterView currentView, PlayerID player,LocationID trail[TRAIL_
 //Any location that the player is currently in, should be included.
 LocationID * connectedLocations(HunterView currentView, int * numLocations, LocationID from, 
                               PlayerID player, Round round, int road, int rail, int sea) {
-    isAdjacent(currentView->map, 0, 1, 0);
-    return NULL;
+    
+    //Get the list corresponding to the given start location
+    VList v = currentView->map->connections[from];
+
+    //Allocate memory for the results
+    LocationID * locs = malloc(*numLocations);
+    locs[0] = from;
+    int array[NUM_LOCATIONS] = {0};
+    int i;
+    int index = 1;
+    
+    for (i = 1; i < *numLocations; i ++) {
+        locs[i] = -1;
+    }
+
+    if (rail) {
+        //Dracula cannot travel by rail
+        if (player != PLAYER_DRACULA) {
+            //The number of cities transversable in one turn depends on the round
+            canReachInN(currentView->map, from, RAIL, currentView->round%4, array);
+            
+            //Already added this one
+            array[from] = 0;
+            for (i = 0; i < NUM_LOCATIONS; i ++) {
+                if (array[i]) {
+                    locs[index] = i;
+                    index ++;
+                }
+            }
+        }
+    }
+
+    while (v != NULL) {
+        //Cycle through the list and get the edges
+        
+        //handle road
+        if (road) {
+            if (v->type == ROAD) {
+                if (!(v->v == ST_JOSEPH_AND_ST_MARYS && player == PLAYER_DRACULA)) {
+                    if (!array[v->v]) {
+                        locs[index] = v->v;
+                        index ++;
+                    }
+                }
+            }
+        }
+
+        
+        if (sea) {
+            if (v->type == SEA) {
+                if (!array[v->v] && locs[index-1] != v->v) {
+                    locs[index] = v->v;
+                    index ++;
+                }
+            }
+        }
+        v = v->next;
+    }
+    
+    return locs;
 }
 
 
@@ -376,7 +450,7 @@ static void destroyGraph(Graph g){
          }
     }
     free(g);
-}   
+}
 
 static void addLink(Graph g, Location start, Location end, Transport type){
     g->connections[start] = addtoList (g, g->connections[start], end, type);
@@ -413,12 +487,26 @@ static VList addtoList (Graph g, VList v, Location loca, Transport type) {
     return v;
 }
 
+static void canReachInN(Graph g, Location start, Transport type, int n, int locs[]) {
+
+    locs[start] = 1;
+    if (n == 0) return;
+    
+    VList l = g->connections[start];
+    while (l!= NULL) {
+        if (type == l->type || type == ANY) {
+            canReachInN(g,l->v, type, n-1, locs);
+        }
+        l = l->next;
+    }
+}
+
+//Generate the map
 static void makeMap(Graph g){
     addLink(g, EDINBURGH, MANCHESTER, ROAD);
     addLink(g, EDINBURGH, MANCHESTER, RAIL);
     addLink(g, EDINBURGH, HAMBURG, SEA);
     addLink(g, EDINBURGH, AMSTERDAM, SEA);
-    
     
     addLink(g, GALWAY, DUBLIN, ROAD);
     addLink(g, GALWAY, LISBON, SEA);
@@ -438,7 +526,6 @@ static void makeMap(Graph g){
     
     addLink (g, SWANSEA, LONDON, ROAD);
     addLink (g, SWANSEA, LONDON, RAIL);
-    
     
     addLink(g, LONDON, LE_HAVRE, SEA);
     addLink(g, LONDON, PLYMOUTH, SEA);
@@ -624,7 +711,6 @@ static void makeMap(Graph g){
     addLink(g, CONSTANTA, BUCHAREST, RAIL);
     addLink(g, CONSTANTA, VARNA, ROAD);
     addLink(g, CONSTANTA, VARNA, SEA);
-
     
     addLink(g, ZAGREB, SZEGED, ROAD);
     addLink(g, ZAGREB, SARAJEVO, ROAD);
@@ -660,71 +746,5 @@ static void makeMap(Graph g){
     addLink(g, VALONA, ATHENS,ROAD);
     
     addLink(g, ATHENS, SALONICA, SEA);
-}
-
-//Useful for debugging
-static void showGraph(Graph g) { 
-    assert(g != NULL); 
-    printf("V=%d, E=%d + %d + %d\n", g->nV, g->nE[ROAD],g->nE[RAIL], g->nE[SEA]); 
-    int i; 
-    for (i = 0; i < g->nV; i++) { 
-        VList n = g->connections[i]; 
-        while (n != NULL) { 
-            printf("%d-%d ",i,n->v); 
-            if(n->type == ROAD){
-                printf("R ");
-            } else if(n->type == SEA){
-                printf("S ");
-            } else if (n->type == RAIL) {
-                printf("RA ");
-            } else {
-                printf("ERROR NO SUCH TYPE");
-                exit(0);
-            }
-            n = n->next; 
-        } 
-        if (g->connections [i] != NULL) 
-            printf("\n"); 
-        }
-}
-/*
-static int numV(Graph g){
-    assert(g != NULL);
-    return g->nV;
-}
-
-static int numE(Graph g, Transport type){
-    assert(g != NULL);
-    assert(type >= 0 && type <= ANY);
-    if(type == ANY){
-        return g->nE[LAND] + g->nE[SEA];
-    } else {
-        return g->nE[type];
-    }
-}
-*/
-//returns 1 if there is an edge from start to end of the given type
-//gives 0 otherwise
-static int isAdjacent(Graph g,Location start, Location end, Transport type){
-    VList l = g->connections[start];
-
-    while (l != NULL) {
-       if (l->v == end && (l->type == type || type == ANY)) {
-           return 1;
-       }
-       l = l->next;
-    }
-
-
-    l = g->connections[end];
-
-    while (l != NULL) {
-       if (l->v == start && (l->type == type || type == ANY)) {
-           return 1;
-       }
-       l = l->next;
-    }
-    
-    return 0;
 }
 

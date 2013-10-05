@@ -96,24 +96,38 @@ HunterView newHunterView( char *pastPlays, playerMessage messages[] ) {
     hunterView->playerLocations[4] = UNKNOWN_LOCATION;
     
     //Store each characters information in a play
-    char play[7];
+    char play[8];
     int i1 = 0;
     int i2 = 0;
-
+    play[7] = '\0';
+    int pos = 0;
+    int turnCount = 0;
+    //A wrapper for updating the hunterView
     while (pastPlays[i1] != '\0')  {
         //Build the string with the player info for this turn
-        play[i2] = pastPlays[i1];
-        if (i2 == 7) {
-            //When the string is full update the hunterView
+        play[i2] = pastPlays[pos];
+        if (i2 == 6) {
+            printf("update ");
             update(hunterView, play);
-            i1++;
+            pos ++;
+            turnCount ++;
+            if (turnCount % 5 == 0) {
+                //When all 5 players have had a turn
+                hunterView->round ++; //Increment the round number
+                //Adjust the game score
+                hunterView->score --;
+            }
+
         }
+        pos ++;
         i1 ++;
         i2 = i1%7;
 
-    }
+        //printf("%d\n", i2);
 
-    update(hunterView, pastPlays);
+
+    }
+    
     hunterView->map = newGraph();
 
     return hunterView;
@@ -223,8 +237,13 @@ static void update(HunterView hunterView, char *play) {
                 //Placed a trap
             }
             if (event == 'V') {
-                //Vampire has matured
-                hunterView->score -= 13;
+                if (i == 2) {
+                    //Because 2 + 3 = 5
+                    //Vampire has matured
+                    hunterView->score -= 13;
+                } else {
+                    //Placed an immature vampire
+                }
             }
             if (event == 'M') {
                 //trap left trail
@@ -243,6 +262,10 @@ static void update(HunterView hunterView, char *play) {
             }
         }
     }
+    
+    //Update the player whose next turn it is
+    hunterView->curPlayer ++;
+    if (hunterView->curPlayer > 4) hunterView->curPlayer = 0; 
 }
 
 // this function frees all memory previously allocated for the HunterView
